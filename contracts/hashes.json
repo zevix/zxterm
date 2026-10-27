@@ -1,0 +1,14 @@
+{
+  "signalling-v1": {
+    "blake3": "ec7f3c12b298325c04abea5fd9957e00517a11753b89615d249aa2cdf1e0dda6",
+    "bytes": 240972
+  },
+  "pointer-v1": {
+    "blake3": "f9c348bf20bf8789667f0a0eaf83f461105fc3edafb5d8f42ec5032d68b4ae0f",
+    "bytes": 187368
+  },
+  "segment-v1": {
+    "blake3": "833f2235f4d21aa7b49f2647d6a688dfa934501583a7b8c2d2f8846456dc9ff9",
+    "bytes": 251215
+  }
+}

@@ -1,0 +1,33 @@
+# ZBTerm's signalling mailbox contract, v1 (docs/projects/260924_freenet-backend/, F5).
+# Built by scripts/build-contracts.sh; the raw .wasm it produces is committed as
+# engine/backends/freenet/contracts/signalling-v1.wasm and pinned in hashes.json.
+# Any change here or in src/ moves the contract key: ship it as -v2, keep -v1.
+[package]
+name = "zbterm-signalling"
+version = "1.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+ed25519-compact = { version = "=2.4.2", default-features = false }
+freenet-stdlib = "=0.10.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+contract = ["freenet-stdlib/contract"]
+default = ["freenet-main-contract"]
+freenet-main-contract = ["contract"]
+trace = ["freenet-stdlib/trace"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[workspace]

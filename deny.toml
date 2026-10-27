@@ -1,0 +1,46 @@
+# Licence gate for this workspace's dependency graph (`X-04`). Only the
+# licences named below are permitted for `cargo deny check licenses`; a
+# dependency under any other licence fails the check. K2-K6/K10 extend the
+# `allow` list as those phases pick exact crates (see plan.md's
+# re-planning signal for K1).
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-3-Clause",
+    "CC0-1.0",
+    # `unicode-ident` (transitive, via `ed25519-dalek`'s `curve25519-dalek-derive`
+    # -> `proc-macro2`/`syn`/`quote`), K2 2026-09-29.
+    "Unicode-3.0",
+    # `aws-lc-rs`/`aws-lc-sys` (transitive, via `str0m`'s default crypto
+    # backend, `dimpl`'s DTLS), K6 2026-09-29: both declare a multi-clause
+    # SPDX expression whose ISC branch cargo-deny checks independently of
+    # the other permissive branches (Apache-2.0/MIT/MIT-0/BSD-3-Clause) it
+    # already carries. ISC is a short, permissive, OSI-approved licence
+    # (materially equivalent to MIT); allowed globally rather than as a
+    # per-crate exception since it is unconditionally permissive on its
+    # own, the same reasoning as the other entries in this list.
+    "ISC",
+    # `webpki-roots` (transitive, via `ureq`'s `rustls`/`rustls-webpki-roots`
+    # feature, K3 2026-09-29, `X-08`): a permissive, source-available data
+    # licence (the Mozilla CA root bundle) with no copyleft term; allowed
+    # globally for the same reason as the other unconditionally permissive
+    # entries above.
+    "CDLA-Permissive-2.0",
+]
+
+# LGPL-3.0-only is permitted for exactly `freenet-stdlib` and its own
+# build-time proc-macro dependency `freenet-macros` (K5, 2026-09-29: same
+# licence, same upstream, not a separate acceptance), statically linked
+# while the source stays public (`X-04`) — never broadened to the global
+# `allow` list above, so any other LGPL-3.0-only dependency still fails
+# the check.
+[[licenses.exceptions]]
+crate = "freenet-stdlib"
+allow = ["LGPL-3.0-only"]
+
+[[licenses.exceptions]]
+crate = "freenet-macros"
+allow = ["LGPL-3.0-only"]

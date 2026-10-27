@@ -1,0 +1,54 @@
+[package]
+name = "zxterm-core"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[dependencies]
+bip39 = { version = "3.0.0", features = ["rand"] }
+blake2 = "0.11.0"
+ed25519-dalek = "3.0.0"
+hex = "0.4.3"
+hmac = "0.13.0"
+rsa = { version = "0.9.10", default-features = false, features = ["std"] }
+sha2 = "0.11.0"
+# K5 (Freenet node client and signalling, spike S1): this machine's node is
+# 0.2.139, built on `freenet-stdlib` 0.12.1 (K0's finding), not the
+# `=0.10.0` ZBTerm JS pins; the Rust client is built against the version
+# this node actually speaks (see K5 handoff notes for the `X-nn` recording
+# this choice).
+freenet-stdlib = { version = "0.12.1", features = ["net"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util"] }
+tokio-tungstenite = "0.27"
+futures = "0.3"
+crypto_secretbox = "0.1"
+blake3 = "1"
+bs58 = "0.5"
+base64 = "0.22"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+str0m = "0.24.0"
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+# K7 (the seam, spike S3): the seam's frame protocol (length-prefixed,
+# `no_std`-friendly compact serialization) between the sidecar and ZBTerm's
+# Bare worker.
+postcard = { version = "1", features = ["use-std"] }
+# K13 (the C2 session protocol, `protocol.md` §3): live-frame AEAD
+# (XChaCha20-Poly1305, `crypto_aead_xchacha20poly1305_ietf`) and the
+# anonymous-sender sealed box (`crypto_box_seal`) for envelopes and input.
+chacha20poly1305 = "0.10"
+crypto_box = { version = "0.9", features = ["seal"] }
+# K15 (C3 segments and live history, design §4.5): zstd-compressed
+# segments (`zstd` 0.13 bundles zstd 1.5.7, the CLI's version family) and
+# the local `vt100` screen snapshots that make history seekable.
+zstd = "0.13"
+vt100 = "0.16"
+
+[features]
+# K7: `test.flood`/`test.echo`, the seam methods the flood criterion needs.
+# Never enabled in a release build that ships without it.
+seam-test = []
+
+[dev-dependencies]
+zxterm-testkit = { path = "../zxterm-testkit" }

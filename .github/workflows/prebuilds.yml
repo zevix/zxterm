@@ -1,0 +1,48 @@
+# The `zxterm-core` sidecar's prebuilds, one per ZBTerm target (X-13, K9).
+# Each job builds the release binary for its target and uploads
+# `npm/zxterm-core-prebuilds/prebuilds/<platform>-<arch>/zxterm-core[.exe]` as an
+# artifact; ZBTerm's packaging stages them into the `zxterm-core-prebuilds`
+# package. Nothing is published.
+#
+# Status (2026-09-29, K9): written, never run - this repository has not been
+# pushed. Only linux-x64 has been built, on the development machine. win32-x64
+# is build-only: the sidecar cannot serve there yet, because its Windows
+# named-pipe listener is a stub (`src/bin/zxterm-core.rs`,
+# `bind_socket_for_platform`), so that job is `experimental` and its failure
+# does not fail the workflow. `aws-lc-sys` (via `str0m`) needs a C toolchain on
+# every runner.
+name: prebuilds
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.dir }}
+    runs-on: ${{ matrix.runner }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { triple: x86_64-unknown-linux-gnu, runner: ubuntu-latest, dir: linux-x64, experimental: false }
+          - { triple: aarch64-unknown-linux-gnu, runner: ubuntu-24.04-arm, dir: linux-arm64, experimental: false }
+          - { triple: aarch64-apple-darwin, runner: macos-latest, dir: darwin-arm64, experimental: false }
+          - { triple: x86_64-apple-darwin, runner: macos-26-intel, dir: darwin-x64, experimental: false }
+          # Build-only: the named pipe is not implemented, the sidecar cannot serve.
+          - { triple: x86_64-pc-windows-msvc, runner: windows-latest, dir: win32-x64, experimental: true }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain (rust-toolchain.toml) and target
+        shell: bash
+        run: |
+          rustup show active-toolchain
+          rustup target add ${{ matrix.triple }}
+      - name: Build and stage the prebuild
+        shell: bash
+        run: scripts/build-prebuilds.sh ${{ matrix.triple }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zxterm-core-${{ matrix.dir }}
+          path: npm/zxterm-core-prebuilds/prebuilds/${{ matrix.dir }}/
+          if-no-files-found: error

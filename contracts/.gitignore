@@ -1,0 +1,4 @@
+# cargo and fdev output of scripts/build-contracts.sh; the raw .wasm that ships is
+# copied to ../<name>-v1.wasm and pinned in hashes.json.
+src/*/target/
+src/*/build/

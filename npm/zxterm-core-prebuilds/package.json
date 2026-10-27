@@ -1,0 +1,12 @@
+{
+  "name": "zxterm-core-prebuilds",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Rust zxterm-core sidecar binary, one per target under prebuilds/<platform>-<arch>/ (X-13). A local file: dependency of ZBTerm; never published.",
+  "license": "MIT",
+  "files": [
+    "prebuilds/",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ]
+}
