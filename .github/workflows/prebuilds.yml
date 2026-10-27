@@ -1,36 +1,37 @@
-# The `zxterm-core` sidecar's prebuilds, one per ZBTerm target (X-13, K9).
-# Each job builds the release binary for its target and uploads
-# `npm/zxterm-core-prebuilds/prebuilds/<platform>-<arch>/zxterm-core[.exe]` as an
-# artifact; ZBTerm's packaging stages them into the `zxterm-core-prebuilds`
-# package. Nothing is published.
+# Builds the `zxterm-core` sidecar for every target ZBTerm ships and stages
+# each binary as `prebuilds/<platform>-<arch>/zxterm-core`. On a `v*` tag the
+# `publish` job assembles all of them into the `zxterm-core-prebuilds` npm
+# package and publishes it; on a manual run it only uploads the artifacts.
 #
-# Status (2026-09-29, K9): written, never run - this repository has not been
-# pushed. Only linux-x64 has been built, on the development machine. win32-x64
-# is build-only: the sidecar cannot serve there yet, because its Windows
-# named-pipe listener is a stub (`src/bin/zxterm-core.rs`,
-# `bind_socket_for_platform`), so that job is `experimental` and its failure
-# does not fail the workflow. `aws-lc-sys` (via `str0m`) needs a C toolchain on
-# every runner.
+# Publishing uses npm trusted publishing (OIDC): configure this repository and
+# workflow as a trusted publisher of `zxterm-core-prebuilds` on npmjs.com, or
+# set an `NPM_TOKEN` secret in the `npm` environment for the first release.
+#
+# Windows is not a target yet: the sidecar's named-pipe listener and its
+# SSH-agent client are Unix-only.
 name: prebuilds
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: read
 
 jobs:
   build:
     name: ${{ matrix.dir }}
     runs-on: ${{ matrix.runner }}
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { triple: x86_64-unknown-linux-gnu, runner: ubuntu-latest, dir: linux-x64, experimental: false }
-          - { triple: aarch64-unknown-linux-gnu, runner: ubuntu-24.04-arm, dir: linux-arm64, experimental: false }
-          - { triple: aarch64-apple-darwin, runner: macos-latest, dir: darwin-arm64, experimental: false }
-          - { triple: x86_64-apple-darwin, runner: macos-26-intel, dir: darwin-x64, experimental: false }
-          # Build-only: the named pipe is not implemented, the sidecar cannot serve.
-          - { triple: x86_64-pc-windows-msvc, runner: windows-latest, dir: win32-x64, experimental: true }
+          - { triple: x86_64-unknown-linux-gnu, runner: ubuntu-22.04, dir: linux-x64 }
+          - { triple: aarch64-unknown-linux-gnu, runner: ubuntu-22.04-arm, dir: linux-arm64 }
+          - { triple: aarch64-apple-darwin, runner: macos-latest, dir: darwin-arm64 }
+          - { triple: x86_64-apple-darwin, runner: macos-26-intel, dir: darwin-x64 }
     steps:
       - uses: actions/checkout@v4
       - name: Rust toolchain (rust-toolchain.toml) and target
@@ -41,8 +42,56 @@ jobs:
       - name: Build and stage the prebuild
         shell: bash
         run: scripts/build-prebuilds.sh ${{ matrix.triple }}
+      - name: Smoke test
+        shell: bash
+        run: npm/zxterm-core-prebuilds/prebuilds/${{ matrix.dir }}/zxterm-core --version
       - uses: actions/upload-artifact@v4
         with:
           name: zxterm-core-${{ matrix.dir }}
           path: npm/zxterm-core-prebuilds/prebuilds/${{ matrix.dir }}/
           if-no-files-found: error
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: zxterm-core-*
+          path: artifacts
+      - name: Assemble the package
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=npm/zxterm-core-prebuilds
+          version="$(node -p "require('./$pkg/package.json').version")"
+          crate="$(sed -n 's/^version = "\(.*\)"$/\1/p' crates/zxterm-core/Cargo.toml | head -1)"
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$version" != "$tag" ] || [ "$crate" != "$tag" ]; then
+            echo "tag $GITHUB_REF_NAME, package.json $version and Cargo.toml $crate must all match" >&2
+            exit 1
+          fi
+          for dir in linux-x64 linux-arm64 darwin-arm64 darwin-x64; do
+            mkdir -p "$pkg/prebuilds/$dir"
+            cp "artifacts/zxterm-core-$dir/zxterm-core" "$pkg/prebuilds/$dir/zxterm-core"
+            # Artifacts do not keep file modes.
+            chmod 0755 "$pkg/prebuilds/$dir/zxterm-core"
+          done
+          cp LICENSE THIRD-PARTY-NOTICES.md "$pkg/"
+          (cd "$pkg" && npm pack --dry-run)
+      - name: Publish
+        working-directory: npm/zxterm-core-prebuilds
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public

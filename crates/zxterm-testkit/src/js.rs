@@ -15,10 +15,13 @@ pub fn js_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("js")
 }
 
-/// The ZBTerm tree parity tests read, from `ZX_ZBTERM` (default
-/// `/zeev/github/zbterm`, `A-5`).
+/// The ZBTerm tree parity tests read, from `ZX_ZBTERM` (default: a `zbterm`
+/// checkout next to this repository, `../zbterm`, `A-5`).
 pub fn zbterm_root() -> PathBuf {
-    PathBuf::from(env::var("ZX_ZBTERM").unwrap_or_else(|_| "/zeev/github/zbterm".into()))
+    match env::var_os("ZX_ZBTERM") {
+        Some(dir) => PathBuf::from(dir),
+        None => PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../zbterm"),
+    }
 }
 
 /// The helper scripts whose ZBTerm JS is the Freenet backend's former JS

@@ -10,7 +10,7 @@
 const path = require('path')
 
 function zbtermRoot() {
-  return process.env.ZX_ZBTERM || '/zeev/github/zbterm'
+  return process.env.ZX_ZBTERM || path.join(__dirname, '../../../../zbterm')
 }
 
 function loadSshKeys() {

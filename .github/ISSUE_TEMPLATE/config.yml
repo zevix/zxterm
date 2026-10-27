@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/zevix/zxterm/security/advisories/new
+    about: Please report security issues privately, not as a public issue.
+  - name: A problem with the ZBTerm app
+    url: https://github.com/zevix/zbterm/issues
+    about: App, install and UI issues belong in the ZBTerm repository.

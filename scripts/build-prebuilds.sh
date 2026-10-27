@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Builds the `zxterm-core` sidecar in release mode and copies it into the
-# local `zxterm-core-prebuilds` npm package (X-13) at
+# `zxterm-core-prebuilds` npm package (X-13) at
 # npm/zxterm-core-prebuilds/prebuilds/<platform>-<arch>/zxterm-core[.exe],
 # the directory shape electron-forge-plugin-prune-prebuilds keeps per target.
-# ZBTerm depends on that package with `file:`; nothing is ever published.
+# The `prebuilds` workflow runs this once per target and publishes the
+# assembled package; locally, ZBTerm can install the folder directly.
 #
 # Usage: scripts/build-prebuilds.sh [<rust-target-triple>]
 # With no triple it builds for the host. <platform>-<arch> follows Node's

@@ -1,6 +1,6 @@
 //! Verifies every `zxterm_core::wire` constant against ZBTerm's current JS
 //! source (design §4.9, `A-5`). Reads the ZBTerm tree named by `ZX_ZBTERM`
-//! (defaulting to `/zeev/github/zbterm`) and asserts each constant's literal
+//! (defaulting to a sibling `../zbterm` checkout) and asserts each constant's literal
 //! value appears in the cited source file. If the tree is absent, the whole
 //! test is skipped with a printed reason — it never silently passes.
 //!
@@ -220,6 +220,16 @@ fn wire_parity_live_tree() {
 #[test]
 fn wire_parity_protocol_spec() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    // The spec lives in the maintainers' project notes, which a public
+    // checkout does not carry.
+    let spec = root.join(PROTOCOL_ENTRIES[0].file);
+    if !spec.is_file() {
+        println!(
+            "SKIP wire_parity_protocol_spec: no protocol spec at {}",
+            spec.display()
+        );
+        return;
+    }
     let failures = check(&root, PROTOCOL_ENTRIES);
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
