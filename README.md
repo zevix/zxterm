@@ -19,8 +19,7 @@ The crate forbids `unsafe` code.
 | `crates/zxterm-core/`          | The library and the `zxterm-core` binary.                               |
 | `crates/zxterm-testkit/`       | Test helpers: scratch homes, a fake SSH agent, a local Freenet node, JS parity runners. |
 | `contracts/`                   | The Freenet contracts (Rust sources) and their compiled, BLAKE3-pinned `.wasm`. |
-| `npm/zxterm-core-prebuilds/`   | The npm package that ships the prebuilt binary to ZBTerm.               |
-| `scripts/`                     | Build helpers for the prebuilds, the contracts and the JS parity tests. |
+| `scripts/`                     | Build helpers for the contracts and the JS parity tests.                |
 
 ## Building
 
@@ -50,29 +49,20 @@ cargo deny check licenses          # needs cargo-deny
 
 Some tests need extra tools and skip with a printed reason when they are missing:
 
-- **JS parity tests** compare the Rust code against ZBTerm's JavaScript. They read a ZBTerm
-  checkout next to this repository (`../zbterm`), or the one named by `ZX_ZBTERM`, with its
+- **JS parity tests** compare the Rust code against ZBTerm's JavaScript. They read the ZBTerm
+  checkout this repository is a submodule of, else one next to it (`../zbterm`), or the one named
+  by `ZX_ZBTERM`, with its
   `node_modules` installed. The tests that compare against ZBTerm's former JS Freenet backend
   need `scripts/prepare-js-reference.sh` to run first.
 - **Freenet tests** need a local `freenet` node binary on `PATH`.
 
-## Prebuilt binaries for ZBTerm
+## How ZBTerm ships it
 
-ZBTerm depends on the `zxterm-core-prebuilds` npm package, which carries one binary per target
-under `prebuilds/<platform>-<arch>/`. ZBTerm's install step removes the binaries for other
-platforms.
+ZBTerm includes this repository as a git submodule (`zxterm/`) and builds the binary in its own
+release workflow, one npm package per platform. This repository publishes nothing to npm. To run
+ZBTerm against a local build, set `ZXTERM_CORE_BIN=/path/to/zxterm-core`.
 
-```sh
-scripts/build-prebuilds.sh                 # this machine's target
-scripts/build-prebuilds.sh <rust-triple>   # e.g. aarch64-unknown-linux-gnu
-```
-
-For local ZBTerm development against an unpublished build, install the package folder into
-ZBTerm with `npm install ../zxterm/npm/zxterm-core-prebuilds`, or point ZBTerm at a binary with
-`ZXTERM_CORE_BIN=/path/to/zxterm-core`.
-
-The `prebuilds` workflow builds every target and, when run on a `v*` tag, publishes the package to
-npm. Supported targets: Linux x64 and arm64 (glibc), macOS arm64 and x64. Windows builds are not
+Supported targets: Linux x64 and arm64 (glibc), macOS arm64 and x64. Windows builds are not
 supported yet: the sidecar's Windows listener (a named pipe) and SSH-agent client are not
 implemented.
 

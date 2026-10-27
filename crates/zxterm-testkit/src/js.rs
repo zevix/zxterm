@@ -15,12 +15,18 @@ pub fn js_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("js")
 }
 
-/// The ZBTerm tree parity tests read, from `ZX_ZBTERM` (default: a `zbterm`
-/// checkout next to this repository, `../zbterm`, `A-5`).
+/// The ZBTerm tree parity tests read, from `ZX_ZBTERM` (`A-5`). By default,
+/// the ZBTerm checkout this repository is a submodule of (`zbterm/zxterm/`),
+/// else a `zbterm` checkout next to it (`../zbterm`).
 pub fn zbterm_root() -> PathBuf {
-    match env::var_os("ZX_ZBTERM") {
-        Some(dir) => PathBuf::from(dir),
-        None => PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../zbterm"),
+    if let Some(dir) = env::var_os("ZX_ZBTERM") {
+        return PathBuf::from(dir);
+    }
+    let parent = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");
+    if parent.join("engine").is_dir() {
+        parent
+    } else {
+        parent.join("zbterm")
     }
 }
 

@@ -6,8 +6,8 @@
 //! live-node round trip.
 //!
 //! Every call here needs only `node` on `PATH` and `ZX_ZBTERM` pointing at
-//! a ZBTerm checkout (default: a sibling `../zbterm` checkout); it skips with a
-//! printed reason if `node` is absent (`A-9`/`A-5`).
+//! a ZBTerm checkout (default: the one this repository is a submodule of);
+//! it skips with a printed reason if `node` is absent (`A-9`/`A-5`).
 //!
 //! > 2026-09-29, K11: ZBTerm's live tree no longer holds this JS (its Freenet
 //! > backend is a proxy to this core, ZBTerm `D-34`); the helper scripts run
