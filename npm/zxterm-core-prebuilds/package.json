@@ -1,12 +1,39 @@
 {
   "name": "zxterm-core-prebuilds",
   "version": "0.1.0",
-  "private": true,
-  "description": "The Rust zxterm-core sidecar binary, one per target under prebuilds/<platform>-<arch>/ (X-13). A local file: dependency of ZBTerm; never published.",
+  "description": "Prebuilt zxterm-core sidecar binaries for ZBTerm, one per target under prebuilds/<platform>-<arch>/.",
   "license": "MIT",
+  "author": "zevix",
+  "keywords": [
+    "zbterm",
+    "zxterm",
+    "prebuilds",
+    "sidecar"
+  ],
+  "os": [
+    "linux",
+    "darwin"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "prebuilds/",
     "LICENSE",
-    "THIRD-PARTY-NOTICES.md"
-  ]
+    "THIRD-PARTY-NOTICES.md",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zevix/zxterm.git",
+    "directory": "npm/zxterm-core-prebuilds"
+  },
+  "bugs": {
+    "url": "https://github.com/zevix/zxterm/issues"
+  },
+  "homepage": "https://github.com/zevix/zxterm#readme"
 }

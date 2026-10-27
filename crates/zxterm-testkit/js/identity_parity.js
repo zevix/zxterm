@@ -15,7 +15,7 @@ const path = require('path')
 // own directory and fail to find them). Plain `Buffer` stands in for `b4a`
 // here (this script only ever runs under plain Node, never Bare).
 function zbtermRoot() {
-  return process.env.ZX_ZBTERM || '/zeev/github/zbterm'
+  return process.env.ZX_ZBTERM || path.join(__dirname, '../../../../zbterm')
 }
 
 function zbtermModule(name) {
