@@ -18,4 +18,4 @@ repository.
 
 ## Supported versions
 
-Only the latest published `zxterm-core-prebuilds` release receives security fixes.
+Only the `zxterm-core` shipped with the latest ZBTerm release receives security fixes.

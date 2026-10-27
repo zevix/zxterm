@@ -8,8 +8,8 @@ Bug reports, fixes and focused improvements are welcome.
 - `cargo test --workspace` passes. If a test skips because a tool is missing, say so in the pull
   request.
 - Changes to anything ZBTerm reads (the seam protocol, wire strings, key derivations, contract
-  hashes) are checked against ZBTerm too: run the JS parity tests with a ZBTerm checkout at
-  `../zbterm` or `ZX_ZBTERM`.
+  hashes) are checked against ZBTerm too: run the JS parity tests from a ZBTerm checkout (this
+  repository as its `zxterm/` submodule), a sibling `../zbterm`, or `ZX_ZBTERM`.
 - A new dependency passes `cargo deny check licenses`. Don't widen the licence allow list in
   `deny.toml` without discussing it in an issue first, and add any attribution the licence needs
   to `THIRD-PARTY-NOTICES.md`.

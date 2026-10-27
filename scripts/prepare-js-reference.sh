@@ -8,7 +8,8 @@
 # is missing.
 #
 # Usage: scripts/prepare-js-reference.sh
-#   ZX_ZBTERM         the ZBTerm tree to read (default: ../zbterm next to this repository)
+#   ZX_ZBTERM         the ZBTerm tree to read (default: the ZBTerm checkout this
+#                     repository is a submodule of, else ../zbterm next to it)
 #   ZX_ZBTERM_JS_REF  the revision (default: the one zxterm_testkit::js names)
 #
 # The copy lives in this repository's target/js-reference/<rev>/ (ignored,
@@ -22,7 +23,13 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-zbterm="${ZX_ZBTERM:-$root/../zbterm}"
+if [ -n "${ZX_ZBTERM:-}" ]; then
+  zbterm="$ZX_ZBTERM"
+elif [ -d "$root/../engine" ]; then
+  zbterm="$root/.."
+else
+  zbterm="$root/../zbterm"
+fi
 default_rev="$(sed -n 's/^pub const ZBTERM_JS_REFERENCE_REV: &str = "\([0-9a-f]*\)";$/\1/p' \
   "$root/crates/zxterm-testkit/src/js.rs")"
 rev="${ZX_ZBTERM_JS_REF:-$default_rev}"

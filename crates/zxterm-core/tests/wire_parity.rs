@@ -1,7 +1,7 @@
 //! Verifies every `zxterm_core::wire` constant against ZBTerm's current JS
 //! source (design §4.9, `A-5`). Reads the ZBTerm tree named by `ZX_ZBTERM`
-//! (defaulting to a sibling `../zbterm` checkout) and asserts each constant's literal
-//! value appears in the cited source file. If the tree is absent, the whole
+//! (default: the ZBTerm checkout this repository is a submodule of) and
+//! asserts each constant's literal value appears in the cited source file. If the tree is absent, the whole
 //! test is skipped with a printed reason — it never silently passes.
 //!
 //! > 2026-09-29, K9: "current JS source" is now ZBTerm's last pure-JS
